@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.js"></script>
+    <style>
+        body { margin: 0; overflow: hidden; }
+        #startDiv{
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: #484747;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-family: Arial;
+            flex-direction: column;
+        }
+
+        #startbutton{
+            padding: 20px 40px;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+    </style>
+</head>
+
+<body>
+    <div id="startDiv">
+        <h1>我的賽車遊戲</h1>
+        <button id="startbutton">開始遊戲</button>
+    </div>
+</body>
+
+<script>
+    document.getElementById("startbutton").addEventListener('click',()=>{
+        document.getElementById('startDiv').style.display = 'none'
+    })
+
+
+    wx=window.innerWidth;
+    wy=window.innerHeight;
+
+    speed=0;
+    right=0;   //正為左,負為右
+
+    const config={
+        type:Phaser.AUTO,
+        width:window.innerWidth,
+        height:window.innerHeight,
+        scene: {
+            preload: preload,
+            create: create,
+            update: update
+        }
+    }
+
+    //辨別裝置
+    function getType() {
+    const width = window.innerWidth
+
+    if (width <= 767){return "手機";}
+    if (width <= 1024){return "平板";}
+    else{return "電腦";}}
+    
+    device=getType()
+    
+
+    //載入圖片
+    function preload(){
+        this.load.image("play","https://i.postimg.cc/MTcCpDNY/1QCt-J1MDnd-removebg-preview.png");
+        this.load.image("path","https://i.postimg.cc/6pmzpXX1/stock-vector-vector-illustration-of-top-view-of-the-racing-track-cartoon-scene-of-view-from-above-of.jpg");
+        
+
+    }
+
+    //創造內容
+    function create(){
+        this.add.image(wx/2,wy/2,"path")
+        .setScale(0.5)
+        .setDisplaySize(wx-100,wy-100)
+
+        player=this.add.image(400, 300, "play");player.setScale(0.3)
+        
+        this.wKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
+        this.aKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
+        this.sKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
+        this.dKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
+
+        
+    }
+        
+
+    //重複執行
+    function update(){
+        go=0.0009
+
+        player.rotation += right;
+        
+        player.x += Math.cos(player.rotation) * speed;
+        player.y += Math.sin(player.rotation) * speed;
+        speed=speed*0.997
+
+        if(this.wKey.isDown && speed<1){
+            speed+=0.02
+        }else if(this.aKey.isDown){
+            right-=go
+        
+        }else if(this.dKey.isDown) {
+            right+=go
+        }
+        if(Math.abs(right)+go>0.02){
+            if(right>0){
+            right=right-go
+            }else{
+                right=right+go
+            }
+        }
+
+        }
+    
+
+    
+
+    const game = new Phaser.Game(config);
+</script>
+    
+
+</html>
+
+
+
+
