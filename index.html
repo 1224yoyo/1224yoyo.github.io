@@ -1,77 +1,152 @@
 <!DOCTYPE html>
 <html>
+<script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/phaser3-rex-plugins/dist/rexvirtualjoystickplugin.min.js"></script>
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-    <style>
-        body{
-            margin: 0;
-            background: #1e1e1e;
-            font-family: Arial;
-            overflow: hidden;              
-            touch-action: none;    
-        }
-        .left button {
-        width: 100%;
-        padding: 12px;
-        margin-bottom: 15px;
-        font-size: 18px;
-        border: none;
-        border-radius: 8px;
+  <style>
+    html body {
+        overflow: hidden;
+        margin: 0;               
+        touch-action: none;        
+      }
 
-        background: #dedcdc;   /* 白色按鈕 */
-        color: #000;           /* 黑字更清楚 */
-        cursor: pointer;
-        transition: 0.15s;
-        }
-        .gameBtn {
-        display: block;
-        width: 280px;
-        padding: 12px;
-        margin: 12px 0;
+    
+    
 
-        background: #cdcccc;
-        border-radius: 8px;
-        text-decoration: none;
-        color: #000;      /* 黑字比較明顯 */
-        font-size: 18px;
-        text-align: center;
-        transition: 0.15s;
-        }
-        .gameBtn:hover {background: #e0e0e0;}
-        .left button:hover {background: #666;}
-        .main{display: flex; height: 100vh; margin: 0;}
-        .left { width: 200px; background: #3b3b3b; padding: 20px;  }
-        .right { flex: 1; background: #555454;padding: 25px;}
-    </style>
+  </style>
+
 </head>
+
 <body>
-    <div class="main">
-        <div class="left" id="leftid">
-            <button onclick="show('window')">電腦</button>
-            <button onclick="show('blie')">平板</button>
-        </div>
-        <div class="right" id="rightid"></div>
-    </div>
+
+  
+  
+
 </body>
 
 <script>
-    const links={
-        'window':{"賽車遊戲": "car.html"},
-        'blie':{"射擊遊戲": "csgo.html"}}
+  
 
-    function show(type){
-        const right = document.getElementById('rightid');   //右
-        right.innerHTML=""
+  let list=[];
+  let kill=[];
+  let speed=20;
+  let i=0;
+  x=500;y=500
+  
 
-        games=links[type]
-        for(let name in games){
-            url=games[name]
-            right.innerHTML += `<a class="gameBtn" href="${url}">${name}</a>`
-        }
+  const config = {
+    type: Phaser.AUTO,
+    width: window.innerWidth,
+    height: window.innerHeight,
+    backgroundColor: '#1e90ff',
+    scene: { preload, create, update },
+    plugins: {global: [{ key: 'rexVirtualJoystick', plugin: rexvirtualjoystickplugin, start: true }]}
+};
 
+  const game = new Phaser.Game(config);
+
+  //碰撞
+  function inthere(a, b) {
+  if (!a || !b) return false;
+  const aBounds = a.getBounds();
+  const bBounds = b.getBounds();
+  return Phaser.Geom.Intersects.RectangleToRectangle(aBounds, bBounds);
+}
+
+  function preload() {
+  console.log("preload(): 載入遊戲資源（例如圖片、音效）");
+  };
+
+  function create() {
+    
+    this.keys = this.input.keyboard.addKeys("W,A,S,D");
+    player=this.add.rectangle(500,500,50,50,0x00ff00)
+
+    this.news = function(x, y) {
+        let rect = this.add.rectangle(x, y, 70, 70, 0xff0000);
+        kill.push(rect);
     }
+
+    this.fire=()=>{
+      let gun=this.add.rectangle(x,y,15,30,0x00ff00)
+      list[i++]=gun
+      
+    }
+    setInterval(this.fire,0.3*1000)
+    
+    this.joystick = this.plugins.get('rexVirtualJoystick').add(this, {
+    x: 100,
+    y: window.innerHeight - 100,
+    radius: 50,
+    base: this.add.circle(0, 0, 50, 0x888888),
+    thumb: this.add.circle(0, 0, 25, 0xcccccc)
+})}
+
+    
+
+
+    
+
+    
+  
+  
+
+  
+  function update() {
+    
+    let cursorKeys = this.joystick.createCursorKeys();
+    wx = window.innerWidth;
+    wy = window.innerHeight;
+
+    // 生成敵人
+    if(kill.length < 5) {
+        this.news(Math.floor(Math.random() * (wx-100)) + 50, 200);
+    }
+    //移動玩家
+    if (cursorKeys.left.isDown && x-2>0){x-=2}
+    if (cursorKeys.right.isDown && x+2<wx){x+=2}
+    if (cursorKeys.up.isDown && y>0){y-=2}
+    if (cursorKeys.down.isDown &&y<wy){y+=2}
+    player.x=x;player.y=y
+    // 移動敵人
+    for(let kIndex = kill.length - 1; kIndex >= 0; kIndex--) {
+        let k = kill[kIndex];
+        if(k){
+          if(k.y+1<window.innerHeight){k.y += 1}else{k.destroy();kill.splice(kIndex, 1)}};  // 確保 k 不為 undefined
+    }
+
+    // 移動子彈
+    for(let pIndex = list.length - 1; pIndex >= 0; pIndex--) {
+        let p = list[pIndex];
+        if(p){if
+          (p.y-3>0){p.y -= 3}else{p.destroy();list.splice(pIndex, 1)}};  // 確保 p 不為 undefined
+    }
+
+    // 檢查碰撞
+    for(let kIndex = kill.length - 1; kIndex >= 0; kIndex--) {
+        let k = kill[kIndex];
+        if(!k) continue;
+        for(let pIndex = list.length - 1; pIndex >= 0; pIndex--) {
+            let p = list[pIndex];
+            if(!p) continue;
+
+            if(inthere(k, p)) {
+                k.destroy();
+                p.destroy();
+                kill.splice(kIndex, 1);
+                list.splice(pIndex, 1);
+                break; // 已刪除 k，跳出子彈迴圈
+            }
+        }
+    }
+}
+
+
+
 </script>
 
 
 </html>
+
