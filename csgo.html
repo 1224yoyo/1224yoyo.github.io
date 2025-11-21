@@ -6,10 +6,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
   <style>
-    html body {
+    html,body {
         overflow: hidden;
         margin: 0;               
-        touch-action: none;        
+        touch-action: none;
+        padding: 0;        
       }
 
     
@@ -27,22 +28,24 @@
 </body>
 
 <script>
+  score=0
+
   let list=[];
   let kill=[];
   let speed=20;
   let i=0;
-  
+  x=500;y=500
   
 
   const config = {
-  type: Phaser.AUTO,       // 自動選擇 WebGL 或 Canvas
-  width:window.innerWidth,              // 遊戲畫面的寬
-  height:window.innerHeight,             // 高
-  backgroundColor: '#1e90ff', // 背景顏色
-  scene: { preload, create, update } // 指定這三個函式
+    type: Phaser.AUTO,
+    width: window.innerWidth,
+    height: window.innerHeight,
+    backgroundColor: '#1e90ff',
+    scene: { preload, create, update },
+    plugins: {global: [{ key: 'rexVirtualJoystick', plugin: rexvirtualjoystickplugin, start: true }]}
+};
 
-  
-  };  
   const game = new Phaser.Game(config);
 
   //碰撞
@@ -58,9 +61,9 @@
   };
 
   function create() {
-    
-
-    this.add.rectangle(500,500,50,50,0x00ff00)
+    scoretext=this.add.text(window.innerWidth-200,50,`分數:${score}`,{fontSize: "32px",color: "#ffffff",padding: { top: 20, bottom: 0 }})
+    this.keys = this.input.keyboard.addKeys("W,A,S,D");
+    player=this.add.rectangle(500,500,50,50,0x00ff00)
 
     this.news = function(x, y) {
         let rect = this.add.rectangle(x, y, 70, 70, 0xff0000);
@@ -68,13 +71,23 @@
     }
 
     this.fire=()=>{
-      let x=500
-      let y=500
       let gun=this.add.rectangle(x,y,15,30,0x00ff00)
       list[i++]=gun
       
-    };
-    setInterval(this.fire,0.3*1000)};
+    }
+    setInterval(this.fire,0.3*1000)
+    
+    this.joystick = this.plugins.get('rexVirtualJoystick').add(this, {
+    x: 100,
+    y: window.innerHeight - 100,
+    radius: 50,
+    base: this.add.circle(0, 0, 50, 0x888888),
+    thumb: this.add.circle(0, 0, 25, 0xcccccc)
+})}
+
+    
+
+
     
 
     
@@ -83,6 +96,8 @@
 
   
   function update() {
+    
+    let cursorKeys = this.joystick.createCursorKeys();
     wx = window.innerWidth;
     wy = window.innerHeight;
 
@@ -90,7 +105,12 @@
     if(kill.length < 5) {
         this.news(Math.floor(Math.random() * (wx-100)) + 50, 200);
     }
-
+    //移動玩家
+    if (cursorKeys.left.isDown && x-2>0){x-=2}
+    if (cursorKeys.right.isDown && x+2<wx){x+=2}
+    if (cursorKeys.up.isDown && y>0){y-=2}
+    if (cursorKeys.down.isDown &&y<wy){y+=2}
+    player.x=x;player.y=y
     // 移動敵人
     for(let kIndex = kill.length - 1; kIndex >= 0; kIndex--) {
         let k = kill[kIndex];
