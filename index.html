@@ -38,14 +38,23 @@
         text-align: center;
         transition: 0.15s;
         }
+        .up {position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 40px;
+        background: #3b3b3b;
+        z-index: 1000; /* 確保在最上層 */}
         .gameBtn:hover {background: #e0e0e0;}
         .left button:hover {background: #666;}
-        .main{display: flex; height: 100dvh; margin: 0;}
+        .main{display: flex; height: 900dvh; margin: 0;margin-top: 40px;}
         .left { width: 200px; background: #3b3b3b; padding: 20px;  }
-        .right { flex: 1; background: #555454;padding: 25px;}
+        .right { flex: 1; background: #555454;padding:20px;}
+        
     </style>
 </head>
 <body>
+    <div class="up"></div>
     <div class="main">
         <div class="left" id="leftid">
             <button onclick="show('window')">電腦</button>
@@ -53,6 +62,8 @@
         </div>
         <div class="right" id="rightid"></div>
     </div>
+
+    
 </body>
 
 <script>
