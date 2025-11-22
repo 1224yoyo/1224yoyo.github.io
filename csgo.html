@@ -12,7 +12,24 @@
         touch-action: none;
         padding: 0;        
       }
+      #startDiv{
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: #484747;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-family: Arial;
+            flex-direction: column;
+        }
 
+        #startbutton{
+            padding: 20px 40px;
+            font-size: 24px;
+            cursor: pointer;
+        }
     
     
 
@@ -21,18 +38,24 @@
 </head>
 
 <body>
-
+  <div id="startDiv">
+        <h1>我的射擊遊戲</h1>
+        <button id="startbutton">開始遊戲</button>
+    </div>
   
   
 
 </body>
 
 <script>
+  document.getElementById("startbutton").addEventListener('click',()=>{
+        document.getElementById('startDiv').style.display = 'none';
+        const game = new Phaser.Game(config);
+    })
   score=0
-
+  const speed=5
   let list=[];
   let kill=[];
-  let speed=20;
   let i=0;
   x=500;y=500
   
@@ -46,7 +69,7 @@
     plugins: {global: [{ key: 'rexVirtualJoystick', plugin: rexvirtualjoystickplugin, start: true }]}
 };
 
-  const game = new Phaser.Game(config);
+  
 
   //碰撞
   function inthere(a, b) {
@@ -57,13 +80,15 @@
 }
 
   function preload() {
-  console.log("preload(): 載入遊戲資源（例如圖片、音效）");
+  this.load.image('player', 'https://i.postimg.cc/SRHp2t07/fei-chuan-de-ping-mian-tu-yong-yu-da-fei-chuan-you-xi-removebg-preview.png');
+  //this.load.image('')
   };
 
   function create() {
-    scoretext=this.add.text(window.innerWidth-200,50,`分數:${score}`,{fontSize: "32px",color: "#ffffff",padding: { top: 20, bottom: 0 }})
+    
     this.keys = this.input.keyboard.addKeys("W,A,S,D");
-    player=this.add.rectangle(500,500,50,50,0x00ff00)
+    player = this.add.sprite(500, 500, 'player');
+    player.setDisplaySize(100, 100); // 可選，調整大小
 
     this.news = function(x, y) {
         let rect = this.add.rectangle(x, y, 70, 70, 0xff0000);
@@ -71,11 +96,12 @@
     }
 
     this.fire=()=>{
-      let gun=this.add.rectangle(x,y,15,30,0x00ff00)
+      let gun=this.add.rectangle(x+28,y-50,5,10,0xFFFF00)
       list[i++]=gun
-      
+      let guns=this.add.rectangle(x-28,y-50,5,10,0xFFFF00)
+      list[i++]=guns
     }
-    setInterval(this.fire,0.3*1000)
+    setInterval(this.fire,0.15*1000)
     
     this.joystick = this.plugins.get('rexVirtualJoystick').add(this, {
     x: 100,
@@ -106,10 +132,10 @@
         this.news(Math.floor(Math.random() * (wx-100)) + 50, 200);
     }
     //移動玩家
-    if (cursorKeys.left.isDown && x-2>0){x-=2}
-    if (cursorKeys.right.isDown && x+2<wx){x+=2}
-    if (cursorKeys.up.isDown && y>0){y-=2}
-    if (cursorKeys.down.isDown &&y<wy){y+=2}
+    if (cursorKeys.left.isDown && x-speed>0){x-=speed}
+    if (cursorKeys.right.isDown && x+speed<wx){x+=speed}
+    if (cursorKeys.up.isDown && y>0){y-=speed}
+    if (cursorKeys.down.isDown &&y<wy){y+=speed}
     player.x=x;player.y=y
     // 移動敵人
     for(let kIndex = kill.length - 1; kIndex >= 0; kIndex--) {
